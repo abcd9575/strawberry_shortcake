@@ -36,10 +36,12 @@ namespace Strawberry_Shortcake.Controllers
         {
             if (ModelState.IsValid)
             {
+
                 model.UserPw = BC.HashPassword(model.UserPw);
+                model.Role = await db.Roles.SingleAsync(r => r.RoleName == "User");
                 db.Users.Add(model);
                 await db.SaveChangesAsync();
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Login", "Users");
             }
 
             return View(model);
@@ -60,7 +62,10 @@ namespace Strawberry_Shortcake.Controllers
 
             if (ModelState.IsValid)
             {
-                var Users = db.Users.Where(u => u.UserEmail == model.UserEmail).ToList();
+                var Users = db.Users
+                                .Include(u => u.Role)
+                                .Where(u => u.UserEmail == model.UserEmail).ToList();
+
                 var user = Users.SingleOrDefault(u => BC.Verify(model.UserPw, u.UserPw));
 
                 if (user != null)
@@ -68,6 +73,7 @@ namespace Strawberry_Shortcake.Controllers
                     var claims = new Claim[] {
                         new Claim(ClaimTypes.Name, user.UserEmail),
                         new Claim(ClaimTypes.Email, user.UserEmail),
+                        new Claim(ClaimTypes.Role, user.Role.RoleName)
                     };
 
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

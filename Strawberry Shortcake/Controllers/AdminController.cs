@@ -12,7 +12,7 @@ using BC = BCrypt.Net.BCrypt;
 
 namespace Strawberry_Shortcake.Controllers
 {
-    [Authorize]
+    [Authorize(Roles="Administrator")]
     public class AdminController : Controller
     {
         private readonly Strawberry_ShortcakeContext db;

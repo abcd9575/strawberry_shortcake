@@ -25,7 +25,7 @@
                             </li>*@
                     </ul>
                     <ul class="navbar-nav navbar-right">
-                        @if (Context.Session.GetInt32("USER_LOGIN_KEY") == null && Context.Session.GetInt32("MASTER_LOGIN_KEY") == null)
+                        @if (Context.User.Identity.IsAuthenticated == false)
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Login">Login</a>

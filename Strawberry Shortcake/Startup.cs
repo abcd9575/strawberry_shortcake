@@ -10,6 +10,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Strawberry_Shortcake.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 
 namespace Strawberry_Shortcake
 {
@@ -30,6 +32,13 @@ namespace Strawberry_Shortcake
 
             services.AddDbContext<Strawberry_ShortcakeContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("Strawberry_ShortcakeContext")));
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(o => {
+                    o.LoginPath = new PathString("/Users/Login");
+                    o.LogoutPath = new PathString("/Users/Logout");
+                    o.ExpireTimeSpan = new TimeSpan(0, 30, 0);
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,11 +56,12 @@ namespace Strawberry_Shortcake
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            
+
             app.UseSession(); // application 에서 사용하겠음.
-            
+
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

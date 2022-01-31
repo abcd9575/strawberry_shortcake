@@ -5,7 +5,7 @@
     }
 
 
-    @if (Context.Session.GetInt32("MASTER_LOGIN_KEY") == null)
+    @if (!Context.User.Identity.IsAuthenticated)
     {
     }
     else

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -28,17 +29,15 @@ namespace Strawberry_Shortcake.Controllers
         }
 
         // 회원가입
-        public async Task<IActionResult> Register()
-        {
-            return View();
-        }
+        public IActionResult Register() => View();
+
         [HttpPost]
         public async Task<IActionResult> Register(User model)
         {
             if (ModelState.IsValid)
             {
                 db.User.Add(model);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
                 return RedirectToAction("Index", "Home");
             }
 
@@ -47,16 +46,13 @@ namespace Strawberry_Shortcake.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Login()
-        {
-            return View();
-        }
+        public IActionResult Login() => View();
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var user = db.User.FirstOrDefault(u => u.UserEmail == model.UserEmail && u.UserPw == model.UserPw);
+                var user = await db.User.FirstOrDefaultAsync(u => u.UserEmail == model.UserEmail && u.UserPw == model.UserPw);
                 
                 if (user != null)
                 {
@@ -102,29 +98,30 @@ namespace Strawberry_Shortcake.Controllers
             return View(user);
         }
 
-        // GET: Users/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+        //// GET: Users/Create
+        //public IActionResult Create()
+        //{
+        //    return View();
+        //}
 
-        // POST: Users/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserNo,UserEmail,UserPw,UserName,Activation")] User user)
-        {
-            if (ModelState.IsValid)
-            {
-                db.Add(user);
-                await db.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(user);
-        }
+        //// POST: Users/Create
+        //// To protect from overposting attacks, enable the specific properties you want to bind to.
+        //// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("UserNo,UserEmail,UserPw,UserName,Activation")] User user)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        db.Add(user);
+        //        await db.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(user);
+        //}
 
         // GET: Users/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -143,6 +140,7 @@ namespace Strawberry_Shortcake.Controllers
         // POST: Users/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("UserNo,UserEmail,UserPw,UserName,Activation")] User user)
@@ -176,6 +174,7 @@ namespace Strawberry_Shortcake.Controllers
         }
 
         // GET: Users/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -194,6 +193,7 @@ namespace Strawberry_Shortcake.Controllers
         }
 
         // POST: Users/Delete/5
+        [Authorize]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

@@ -20,18 +20,20 @@ namespace Strawberry_Shortcake.Controllers
 
         public IActionResult Index()
         {
-            var user = new User();
-            user.UserName = "김진혁";
-            user.UserNo = 1;
+           return View();
+        }
 
-            ViewBag.User = user;
+        public IActionResult LoginSuccess()
+        {
+
             return View();
         }
 
-        public IActionResult Privacy()
+
+        /*public IActionResult Privacy()
         {
             return View();
-        }
+        }*/
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

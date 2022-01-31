@@ -9,6 +9,10 @@ namespace Strawberry_Shortcake.Data
 {
     public class Strawberry_ShortcakeContext : DbContext
     {
+        public Strawberry_ShortcakeContext()
+        {
+        }
+
         public Strawberry_ShortcakeContext (DbContextOptions<Strawberry_ShortcakeContext> options)
             : base(options)
         {

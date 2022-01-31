@@ -26,6 +26,7 @@ namespace Strawberry_Shortcake
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddSession(); // 서비스에 등록함
 
             services.AddDbContext<Strawberry_ShortcakeContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("Strawberry_ShortcakeContext")));
@@ -46,7 +47,9 @@ namespace Strawberry_Shortcake
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            
+            app.UseSession(); // application 에서 사용하겠음.
+            
             app.UseRouting();
 
             app.UseAuthorization();

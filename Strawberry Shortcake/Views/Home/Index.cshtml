@@ -1,14 +1,51 @@
-﻿
+﻿@using Microsoft.AspNetCore.Http;
+
 @{
     ViewData["Title"] = "Home Page";
 }
 @*<H1> 새로운 유저의 번호 : @Model.UserNo</H1>*@
-<H2> 새로운 유저의 번호 : @ViewBag.User.UserNo</H2>
-<H2> 새로운 유저의 이름 : @ViewBag.User.UserName</H2>
+@*<H2> 새로운 유저의 번호 : @ViewBag.User.UserNo</H2>*@
+<style>
+    .mybtn {
+        font-size: 200px;
+        margin: auto;
+        display: block;
+        background-color: transparent;
+        border: hidden;
+    }
+
+    a:hover {
+        color: white;
+        background-color: transparent;
+        text-decoration: underline;
+    }
+
+    #wrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 75vh;
+    }
+
+    //마우스 오버했을 때 링크 상태
+</style>
+<div id="wrap">
+    <div class="center">
+        @if (Context.Session.GetInt32("USER_LOGIN_KEY") == null)
+        {
+            <a href="#"><button class="mybtn" onclick="location.href='/users/Login'"> 🍰 </button></a>
+        }
+        else
+        {
+            <a href="#"><button class="mybtn" onclick="location.href='/home/LoginSuccess'"> 🍰 </button></a>
+        }
+    </div>
+</div>
+
 
 @*
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+    <div class="text-center">
+        <h1 class="display-4">Welcome</h1>
+        <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    </div>
 *@

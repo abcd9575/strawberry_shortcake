@@ -1,0 +1,43 @@
+﻿@model Strawberry_Shortcake.ViewModel.LoginViewModel
+<style>
+    #wrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 75vh;
+    }
+</style>
+
+
+<div id="wrap">
+    <div class="col-4 center">
+        <form class="form-horizontal" method="post" asp-controller="Users" asp-action="Login">
+            <h1 style="">Login</h1>
+            <section class="section" role="application">
+                <div class="form-group">
+                    <lable>Email Address *</lable>
+                    <input type="text" class="form-control" asp-for="UserEmail" placeholder="Enter your email address" />
+                    <span class="text-danger" asp-validation-for="UserEmail"></span>
+                </div>
+
+                <div class="form-group">
+                    <lable>Password *</lable>
+                    <input type="password" class="form-control" asp-for="UserPw" placeholder="Enter your password" />
+                    <span class="text-danger" asp-validation-for="UserPw"></span>
+                </div>
+
+                <div class="form-group row justify-content-around">
+                    <div class="col-4">
+                        <button type="submit" class="btn btn-block btn-success">🍰</button>
+                    </div>
+                    <div class="col-4">
+                        <a class="btn btn-block btn-info" href="/users/register">Register</a>
+                    </div>
+                </div>
+            </section>
+            <div class="text-danger" asp-validation-summary="ModelOnly"></div>
+
+        </form>
+    </div>
+</div>
+

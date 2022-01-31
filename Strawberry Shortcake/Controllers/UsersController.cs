@@ -2,29 +2,88 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Strawberry_Shortcake.Data;
 using Strawberry_Shortcake.Models;
+using Strawberry_Shortcake.ViewModel;
 
 namespace Strawberry_Shortcake.Controllers
 {
     public class UsersController : Controller
     {
-        private readonly Strawberry_ShortcakeContext _context;
+        private readonly Strawberry_ShortcakeContext db;
 
         public UsersController(Strawberry_ShortcakeContext context)
         {
-            _context = context;
+            db = context;
         }
 
         // GET: Users
         public async Task<IActionResult> Index()
         {
-            return View(await _context.User.ToListAsync());
+            return View(await db.User.ToListAsync());
         }
 
+        // 회원가입
+        public async Task<IActionResult> Register()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> Register(User model)
+        {
+            if (ModelState.IsValid)
+            {
+                db.User.Add(model);
+                db.SaveChanges();
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(model);
+
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Login()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = db.User.FirstOrDefault(u => u.UserEmail == model.UserEmail && u.UserPw == model.UserPw);
+                
+                if (user != null)
+                {
+                    if (user.UserEmail == "abcd95751@gmail.com")
+                    {
+                        HttpContext.Session.SetInt32("MASTER_LOGIN_KEY", user.UserNo);
+                        return RedirectToAction("Index", "Users");
+                    }
+                    // 로그인에 성공했을때
+                    //HttpContext.Session.SetInt32(key,value);
+                    HttpContext.Session.SetInt32("USER_LOGIN_KEY",user.UserNo);
+                    return RedirectToAction("LoginSuccess", "Home");
+                    
+                }
+                //로그인에 실패했을 때 "문자열 아무것도 없을때 = string.empty"
+                ModelState.AddModelError(string.Empty, "Incorrect username or password.");
+                
+            }
+            return View(model);
+        }
+
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Remove("USER_LOGIN_KEY");
+            HttpContext.Session.Remove("MASTER_LOGIN_KEY");
+            return RedirectToAction("Index", "Home");
+        }
         // GET: Users/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -33,7 +92,7 @@ namespace Strawberry_Shortcake.Controllers
                 return NotFound();
             }
 
-            var user = await _context.User
+            var user = await db.User
                 .FirstOrDefaultAsync(m => m.UserNo == id);
             if (user == null)
             {
@@ -58,8 +117,8 @@ namespace Strawberry_Shortcake.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(user);
-                await _context.SaveChangesAsync();
+                db.Add(user);
+                await db.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(user);
@@ -73,7 +132,7 @@ namespace Strawberry_Shortcake.Controllers
                 return NotFound();
             }
 
-            var user = await _context.User.FindAsync(id);
+            var user = await db.User.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -97,8 +156,8 @@ namespace Strawberry_Shortcake.Controllers
             {
                 try
                 {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
+                    db.Update(user);
+                    await db.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -124,7 +183,7 @@ namespace Strawberry_Shortcake.Controllers
                 return NotFound();
             }
 
-            var user = await _context.User
+            var user = await db.User
                 .FirstOrDefaultAsync(m => m.UserNo == id);
             if (user == null)
             {
@@ -139,15 +198,15 @@ namespace Strawberry_Shortcake.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var user = await _context.User.FindAsync(id);
-            _context.User.Remove(user);
-            await _context.SaveChangesAsync();
+            var user = await db.User.FindAsync(id);
+            db.User.Remove(user);
+            await db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool UserExists(int id)
         {
-            return _context.User.Any(e => e.UserNo == id);
+            return db.User.Any(e => e.UserNo == id);
         }
     }
 }

@@ -2,27 +2,30 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Strawberry_Shortcake.Data;
 using Strawberry_Shortcake.Models;
+using BC = BCrypt.Net.BCrypt;
 
 namespace Strawberry_Shortcake.Controllers
 {
+    [Authorize]
     public class AdminController : Controller
     {
-        private readonly Strawberry_ShortcakeContext _context;
+        private readonly Strawberry_ShortcakeContext db;
 
         public AdminController(Strawberry_ShortcakeContext context)
         {
-            _context = context;
+            db = context;
         }
 
         // GET: Admin
         public async Task<IActionResult> Index()
         {
-            return View(await _context.User.ToListAsync());
+            return View(await db.User.ToListAsync());
         }
 
         // GET: Admin/Details/5
@@ -33,7 +36,7 @@ namespace Strawberry_Shortcake.Controllers
                 return NotFound();
             }
 
-            var user = await _context.User
+            var user = await db.User
                 .FirstOrDefaultAsync(m => m.UserNo == id);
             if (user == null)
             {
@@ -58,8 +61,9 @@ namespace Strawberry_Shortcake.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(user);
-                await _context.SaveChangesAsync();
+                user.UserPw = BC.HashPassword(user.UserPw);
+                db.Add(user);
+                await db.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(user);
@@ -73,7 +77,7 @@ namespace Strawberry_Shortcake.Controllers
                 return NotFound();
             }
 
-            var user = await _context.User.FindAsync(id);
+            var user = await db.User.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -97,8 +101,9 @@ namespace Strawberry_Shortcake.Controllers
             {
                 try
                 {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
+                    user.UserPw = BC.HashPassword(user.UserPw);
+                    db.Update(user);
+                    await db.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -124,7 +129,7 @@ namespace Strawberry_Shortcake.Controllers
                 return NotFound();
             }
 
-            var user = await _context.User
+            var user = await db.User
                 .FirstOrDefaultAsync(m => m.UserNo == id);
             if (user == null)
             {
@@ -139,15 +144,15 @@ namespace Strawberry_Shortcake.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var user = await _context.User.FindAsync(id);
-            _context.User.Remove(user);
-            await _context.SaveChangesAsync();
+            var user = await db.User.FindAsync(id);
+            db.User.Remove(user);
+            await db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool UserExists(int id)
         {
-            return _context.User.Any(e => e.UserNo == id);
+            return db.User.Any(e => e.UserNo == id);
         }
     }
 }

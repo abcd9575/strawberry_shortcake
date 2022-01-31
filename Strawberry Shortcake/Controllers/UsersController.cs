@@ -37,7 +37,7 @@ namespace Strawberry_Shortcake.Controllers
             if (ModelState.IsValid)
             {
                 model.UserPw = BC.HashPassword(model.UserPw);
-                db.User.Add(model);
+                db.Users.Add(model);
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index", "Home");
             }
@@ -60,7 +60,7 @@ namespace Strawberry_Shortcake.Controllers
 
             if (ModelState.IsValid)
             {
-                var Users = db.User.Where(u => u.UserEmail == model.UserEmail).ToList();
+                var Users = db.Users.Where(u => u.UserEmail == model.UserEmail).ToList();
                 var user = Users.SingleOrDefault(u => BC.Verify(model.UserPw, u.UserPw));
 
                 if (user != null)

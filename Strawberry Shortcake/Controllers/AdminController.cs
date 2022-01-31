@@ -25,7 +25,7 @@ namespace Strawberry_Shortcake.Controllers
         // GET: Admin
         public async Task<IActionResult> Index()
         {
-            return View(await db.User.ToListAsync());
+            return View(await db.Users.ToListAsync());
         }
 
         // GET: Admin/Details/5
@@ -36,7 +36,7 @@ namespace Strawberry_Shortcake.Controllers
                 return NotFound();
             }
 
-            var user = await db.User
+            var user = await db.Users
                 .FirstOrDefaultAsync(m => m.UserNo == id);
             if (user == null)
             {
@@ -77,7 +77,7 @@ namespace Strawberry_Shortcake.Controllers
                 return NotFound();
             }
 
-            var user = await db.User.FindAsync(id);
+            var user = await db.Users.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -129,7 +129,7 @@ namespace Strawberry_Shortcake.Controllers
                 return NotFound();
             }
 
-            var user = await db.User
+            var user = await db.Users
                 .FirstOrDefaultAsync(m => m.UserNo == id);
             if (user == null)
             {
@@ -144,15 +144,15 @@ namespace Strawberry_Shortcake.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var user = await db.User.FindAsync(id);
-            db.User.Remove(user);
+            var user = await db.Users.FindAsync(id);
+            db.Users.Remove(user);
             await db.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool UserExists(int id)
         {
-            return db.User.Any(e => e.UserNo == id);
+            return db.Users.Any(e => e.UserNo == id);
         }
     }
 }

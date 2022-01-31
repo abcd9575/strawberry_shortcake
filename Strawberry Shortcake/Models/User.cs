@@ -40,5 +40,7 @@ namespace Strawberry_Shortcake.Models
         [Required(ErrorMessage = "Required")]
         public bool Activation { get; set; }
 
+        public int RoleId { get; set; }
+        public Role Role { get; set; }
     }
 }

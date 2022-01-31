@@ -2,15 +2,17 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Strawberry_Shortcake.Data;
 
 namespace Strawberry_Shortcake.Migrations
 {
     [DbContext(typeof(Strawberry_ShortcakeContext))]
-    partial class Strawberry_ShortcakeContextModelSnapshot : ModelSnapshot
+    [Migration("20220131181107_role")]
+    partial class role
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

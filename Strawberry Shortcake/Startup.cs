@@ -42,10 +42,14 @@ namespace Strawberry_Shortcake
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, Strawberry_ShortcakeContext db)
         {
             if (env.IsDevelopment())
             {
+                /* 개발중일 땐 모든 DB를 날리고 다시 생성 */
+                db.Database.EnsureDeleted();
+                db.Database.EnsureCreated();
+
                 app.UseDeveloperExceptionPage();
             }
             else

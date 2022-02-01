@@ -21,10 +21,11 @@ namespace Strawberry_Shortcake.Models
         [Display(Name ="e-mail")]
         [EmailAddress]
         public string UserEmail { get; set; }
-        
+
         /// <summary>
         /// 사용자 비밀번호
         /// </summary>
+        [DataType(DataType.Password)]
         [Required(ErrorMessage = "Required")]
         public string UserPw { get; set; }
 
@@ -40,7 +41,6 @@ namespace Strawberry_Shortcake.Models
         [Required(ErrorMessage = "Required")]
         public bool Activation { get; set; }
 
-        public int RoleId { get; set; }
-        public virtual Role Role { get; set; }
+        public Role Role { get; set; }
     }
 }

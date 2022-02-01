@@ -3,14 +3,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Strawberry_Shortcake.Models
 {
-    public class Role
+    /* Note
+     * - 숫자가 낮을 수록 낮은 권한
+     * - 이미 존재하는 권한의 이름을 바꾸면 문제가 생길 수 있음
+     */
+    public enum Role : uint
     {
-        [Key]
-        public int Id { get; set; }
-        public string RoleName { get; set; }
-
-        public string Description { get; set; }
-
-        public virtual ICollection<User> Users { get; set; }
+        User = 1,
+        Manager = 2,
+        Administrator = 3,
     }
 }

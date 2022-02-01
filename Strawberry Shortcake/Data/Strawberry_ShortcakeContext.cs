@@ -20,7 +20,6 @@ namespace Strawberry_Shortcake.Data
         }
 
         public DbSet<Strawberry_Shortcake.Models.User> Users { get; set; }
-        public DbSet<Strawberry_Shortcake.Models.Role> Roles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             base.OnModelCreating(modelBuilder);
@@ -29,28 +28,17 @@ namespace Strawberry_Shortcake.Data
                 .HasIndex(r => r.UserEmail)
                 .IsUnique();
 
-
-            modelBuilder.Entity<Role>()
-                .HasIndex(r => r.RoleName)
-                .IsUnique();
-
             modelBuilder.Entity<User>()
-                .HasOne<Role>(u => u.Role)
-                .WithMany(r => r.Users)
-                .HasForeignKey(u => u.RoleId);
+                .Property(u => u.Role)
+                .HasConversion(
+                    r => r.ToString(), // DB에 저장할 때 String으로 저장
+                    r => Enum.Parse<Role>(r) // DB에서 가져올 때 Role 타입으로 가져옴
+                );
 
             Seed(modelBuilder);
         }
 
         private void Seed(ModelBuilder modelBuilder) {
-            Role[] 기본등급 = new Role[] {
-                new Role{ Id = 1, RoleName = "User" },
-                new Role{ Id = 2, RoleName = "Manager" },
-                new Role{ Id = 3, RoleName = "Administrator" },
-            };
-
-            modelBuilder.Entity<Role>()
-                .HasData(기본등급);
 
             modelBuilder.Entity<User>()
                 .HasData(new User
@@ -60,7 +48,7 @@ namespace Strawberry_Shortcake.Data
                     UserName = string.Empty,
                     UserPw = BC.HashPassword("1q2w3e$R"),
                     Activation = true,
-                    RoleId = 3
+                    Role = Role.Administrator
                 });
             
         }

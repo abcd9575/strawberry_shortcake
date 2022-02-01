@@ -8,6 +8,7 @@ namespace Strawberry_Shortcake.ViewModel
         public string UserEmail { get; set; }
         
         [Required(ErrorMessage = "Enter your password.")]
+        [DataType(DataType.Password)]
         public string UserPw { get; set; }
 
     }

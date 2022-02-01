@@ -22,6 +22,9 @@ namespace Strawberry_Shortcake.Controllers
     {
         private readonly Strawberry_ShortcakeContext db;
 
+        /* TODO
+         * - Email 중복시 Error page 생성
+         */
         public UsersController(Strawberry_ShortcakeContext context)
         {
             db = context;
@@ -38,7 +41,7 @@ namespace Strawberry_Shortcake.Controllers
             {
 
                 model.UserPw = BC.HashPassword(model.UserPw);
-                model.Role = await db.Roles.SingleAsync(r => r.RoleName == "User");
+                model.Role = Role.User;
                 db.Users.Add(model);
                 await db.SaveChangesAsync();
                 return RedirectToAction("Login", "Users");
@@ -73,7 +76,7 @@ namespace Strawberry_Shortcake.Controllers
                     var claims = new Claim[] {
                         new Claim(ClaimTypes.Name, user.UserEmail),
                         new Claim(ClaimTypes.Email, user.UserEmail),
-                        new Claim(ClaimTypes.Role, user.Role.RoleName)
+                        new Claim(ClaimTypes.Role, Enum.GetName<Role>(user.Role))
                     };
 
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

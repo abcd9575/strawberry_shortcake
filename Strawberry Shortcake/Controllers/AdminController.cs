@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Strawberry_Shortcake.Data;
 using Strawberry_Shortcake.Models;
+using Strawberry_Shortcake.ViewModel;
 using BC = BCrypt.Net.BCrypt;
 
 namespace Strawberry_Shortcake.Controllers
@@ -17,8 +18,6 @@ namespace Strawberry_Shortcake.Controllers
     public class AdminController : Controller
     {
         /* TODO
-         * 
-         * - 회원 등급 상수화 (코딩하기 쉽게)
          */
         private readonly Strawberry_ShortcakeContext db;
 
@@ -30,17 +29,16 @@ namespace Strawberry_Shortcake.Controllers
         {
             /* 지금 로그인 한 계정의 회원등급 가져오기 */
             var CurrentRoleName = User.Claims.Single(r => r.Type == ClaimTypes.Role).Value;
-            var CurrentRole = db.Roles.SingleOrDefault(r => r.RoleName.Equals(CurrentRoleName));
+            var CurrentRole = Enum.Parse(typeof(Role), CurrentRoleName);
 
-            return db.Roles.ToList().Select(r => new SelectListItem
+            return Enum.GetValues<Role>().ToList().Select(r=> new SelectListItem
             {
-                Text = r.RoleName,
-                Value = r.Id.ToString(),
-                Selected = user == null ? r.Id == 1 : user?.RoleId == r.Id,
+                Text = Enum.GetName<Role>(r), // Enum 타입에서 string 타입으로
+                Value = Enum.GetName<Role>(r),
                 Disabled = 
-                    r.RoleName.Equals("Administrator") // 새로운 관리자 계정 만들기 금지
-                    && user?.Role?.RoleName?.Equals("Administrator") != true // 지금 로그인한 계정이 관리자 계정이 아닐 경우
-                    && r.Id >= CurrentRole.Id, // 지금 로그인 한 계정보다 높은 등급을 설정 못하게 방지
+                    r == Role.Administrator // 새로운 관리자 계정 만들기 금지
+                    && user?.Role != Role.Administrator // 지금 로그인한 계정이 관리자 계정이 아닐 경우
+                    && (uint)r >= (uint)CurrentRole, // 지금 로그인 한 계정보다 높은 등급은 설정 못하게 방지
             }).ToList();
         }
 
@@ -72,7 +70,8 @@ namespace Strawberry_Shortcake.Controllers
         public IActionResult Create()
         {
             UserViewModel model = new UserViewModel {
-                Role = GetAvailableRoles()
+                Role = Role.User, //기본 회원등급: User
+                Roles = GetAvailableRoles()
             };
             return View(model);
         }
@@ -82,7 +81,7 @@ namespace Strawberry_Shortcake.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("UserNo,UserEmail,UserPw,UserName,Activation,RoleId")] User user)
+        public async Task<IActionResult> Create([Bind("UserNo,UserEmail,UserPw,UserName,Activation,Role")] User user)
         {
             if (ModelState.IsValid)
             {
@@ -112,9 +111,8 @@ namespace Strawberry_Shortcake.Controllers
                 UserNo = user.UserNo,
                 UserEmail = user.UserEmail,
                 Activation = user.Activation,
-                UserPw = user.UserPw,
-                RoleId = user.RoleId,
-                Role = GetAvailableRoles(user)
+                Role = user.Role,
+                Roles = GetAvailableRoles(user)
             };
             return View(model);
         }
@@ -124,18 +122,36 @@ namespace Strawberry_Shortcake.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("UserNo,UserEmail,UserPw,UserName,Activation,RoleId")] User user)
+        public async Task<IActionResult> Edit(int id, [Bind("UserNo,UserEmail,UserPw,UserName,Activation,Role")] User user)
         {
             if (id != user.UserNo)
             {
                 return NotFound();
             }
 
+
+            if (String.IsNullOrWhiteSpace(user.UserPw) == false)
+            {
+                /* 만약 비밀번호 칸이 빈칸이 아니라면, 비밀번호를 변경해 줌*/
+                user.UserPw = BC.HashPassword(user.UserPw);
+            }
+            else
+            {
+                /* 빈칸이라면 이전 비밀번호 유지 */
+                User old = await db.Users
+                            .AsNoTracking() // LinQ가 값 변경 추적 안하도록
+                            .SingleAsync(u => u.UserNo == id);
+                user.UserPw = old.UserPw;
+            }
+
+            /* 수정된 UserPw를 위해 ModelState 초기화 후 다시 검증 */
+            ModelState.Clear();
+            TryValidateModel(user);
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    user.UserPw = BC.HashPassword(user.UserPw);
                     db.Update(user);
                     await db.SaveChangesAsync();
                 }

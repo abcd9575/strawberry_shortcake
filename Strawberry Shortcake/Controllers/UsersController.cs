@@ -57,7 +57,10 @@ namespace Strawberry_Shortcake.Controllers
             if (User.Identity.IsAuthenticated) // 이미 Login 했을 때
                 return RedirectToAction("LoginSuccess", "Home");
 
-            return View();
+            return View(new LoginViewModel
+            {
+                ReturnUrl = Request.Query["ReturnUrl"].FirstOrDefault()
+            });
         }
         [HttpPost, AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -66,7 +69,6 @@ namespace Strawberry_Shortcake.Controllers
             if (ModelState.IsValid)
             {
                 var Users = db.Users
-                                .Include(u => u.Role)
                                 .Where(u => u.UserEmail == model.UserEmail).ToList();
 
                 var user = Users.SingleOrDefault(u => BC.Verify(model.UserPw, u.UserPw));
@@ -83,7 +85,7 @@ namespace Strawberry_Shortcake.Controllers
                     await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(identity));
-                    return RedirectToAction("LoginSuccess", "Home");
+                    return RedirectToReturnUrl(model.ReturnUrl);
                 }
                 else {
                     //로그인에 실패했을 때 "문자열 아무것도 없을때 = string.empty"
@@ -97,6 +99,13 @@ namespace Strawberry_Shortcake.Controllers
         {
             await HttpContext.SignOutAsync();
             return RedirectToAction("Index", "Home");
+        }
+
+        private IActionResult RedirectToReturnUrl(string returnUrl) {
+            if (Url.IsLocalUrl(returnUrl) == false)
+                returnUrl = Url.Action("LoginSuccess", "Home");
+
+            return Redirect(returnUrl);
         }
     }
 }

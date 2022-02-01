@@ -11,5 +11,6 @@ namespace Strawberry_Shortcake.ViewModel
         [DataType(DataType.Password)]
         public string UserPw { get; set; }
 
+        public string ReturnUrl { get; set; }
     }
 }

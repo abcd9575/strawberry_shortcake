@@ -54,6 +54,14 @@ namespace Strawberry_Shortcake
             }
             else
             {
+                if (db.Database.GetPendingMigrations().Count() > 0) {
+                    /* 
+                     * 만약 Add-Migration한 내용들 중에 Update-Database하지 않은 게 있다면,
+                     * 자동으로 Update-Database 호출
+                     */
+                    db.Database.Migrate();
+                }
+
                 app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
